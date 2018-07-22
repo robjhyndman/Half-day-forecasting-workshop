@@ -1,7 +1,7 @@
 ---
-title: "Forecasting: principles and practice"
+title: "ACEMS Forecasting Workshop"
 author: "Rob J Hyndman"
-date: "1.3&nbsp; Forecast evaluation"
+date: "1&nbsp; Forecast Evaluation"
 fontsize: 14pt
 output:
   beamer_presentation:
@@ -22,6 +22,87 @@ knitr::opts_chunk$set(
 library(fpp2)
 options(digits=4, width=55)
 ```
+
+# Resources
+
+## Resources
+
+\begin{alertblock}{}{\centerline{\large\textbf{\url{robjhyndman.com/acemsforecasting2018}}}}
+\end{alertblock}
+
+\large
+
+ * Slides
+ * Exercises
+ * Textbook
+ * Useful links
+
+
+## Key reference
+
+\large
+
+\begin{block}{}\bf
+\hangafter=1\hangindent=.3cm
+ {Hyndman, R.~J. \& Athanasopoulos, G. (2018) \emph{Forecasting: principles and practice}, 2nd ed.}
+\end{block}
+\begin{alertblock}{}\Large
+\centerline{\bf OTexts.org/fpp2/}
+\end{alertblock}
+
+
+  * Free and online
+  * Data sets in associated R package
+  * R code for examples
+
+\fontsize{14}{15}\sf\vspace*{0.2cm}
+
+```r
+install.packages("fpp2", dependencies=TRUE)
+```
+
+
+## Outline
+\vspace*{-0.1cm}\centering\fontsize{18}{24}\sf
+\begin{tabular}{lr}
+  \bf Topic   & \bf Chapter \\
+  \midrule
+  1~    Forecast evaluation         & 3 \\
+  2~    ARIMA models                & 8 \\
+  3~    Dynamic regression          & 9 \\
+  4~    Hierarchical forecasting    & 10 \\
+  5~    Ensembles                   & 12
+\end{tabular}
+
+# The statistical forecasting perspective
+
+## Sample futures
+
+```{r austa1, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE, fig.width=9, fig.height=5.8}
+fit <- ets(austa)
+df <- cbind(austa, simulate(fit,10))
+for(i in seq(9))
+  df <- cbind(df, simulate(fit,10))
+colnames(df) <- c("Data", paste("Future",1:10))
+autoplot(df) +
+  ylim(min(austa),10) +
+  ylab("Millions of visitors") + xlab("Year") +
+  ggtitle("Total international visitors to Australia") +
+ scale_colour_manual(values=c('#000000',rainbow(10)),
+                     breaks=c("Data",paste("Future",1:10)),
+                     name=" ") +
+  ylim(.85,10.0)
+```
+
+## Forecast intervals
+
+```{r austa2, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE, fig.width=8.6, fig.height=6}
+autoplot(forecast(fit)) +
+  ylab("Millions of visitors") + xlab("Year") +
+  ggtitle("Forecasts of total international visitors to Australia") +
+  ylim(0.85,10.0)
+```
+
 
 # Benchmark methods
 
@@ -187,17 +268,6 @@ autoplot(goog200) +
 ```
 
 ## Example: Google stock price
-
-\alert{Na\"{\i}ve forecast:}
-
-\[\hat{y}_{t|t-1}= y_{t-1}\]\pause
-\[e_t = y_t-y_{t-1}\]\pause
-
-\begin{alertblock}{}
-Note: $e_t$ are one-step-forecast residuals
-\end{alertblock}
-
-## Example: Google stock price
 \fontsize{10}{10}\sf
 
 ```{r dj4, echo=TRUE, warning=FALSE, fig.height=3.6}
@@ -208,28 +278,10 @@ autoplot(goog200, series="Data") +
   ggtitle("Google Stock (daily ending 6 December 2013)")
 ```
 
-## Example: Google stock price
-\fontsize{10}{10}\sf
+## `checkresiduals` function
 
-```{r dj5, echo=TRUE, fig.height=3.6}
-res <- residuals(naive(goog200))
-autoplot(res) + xlab("Day") + ylab("") +
-  ggtitle("Residuals from naïve method")
-```
-
-## Example: Google stock price
-\fontsize{11}{11}\sf
-
-```{r dj6, warning=FALSE}
-gghistogram(res, add.normal=TRUE) +
-  ggtitle("Histogram of residuals")
-```
-
-## Example: Google stock price
-\fontsize{11}{11}\sf
-
-```{r dj7}
-ggAcf(res) + ggtitle("ACF of residuals")
+```{r, echo=TRUE, fig.height=4}
+checkresiduals(naive(goog200))
 ```
 
 ## ACF of residuals
@@ -239,12 +291,6 @@ ggAcf(res) + ggtitle("ACF of residuals")
   * So a standard residual diagnostic is to check the ACF of the residuals of a forecasting method.
 
   * We *expect* these to look like white noise.
-
-## `checkresiduals` function
-
-```{r, echo=TRUE, fig.height=4}
-checkresiduals(naive(goog200))
-```
 
 ## Portmanteau tests
 \fontsize{14}{14.5}\sf
@@ -262,30 +308,6 @@ where $h$  is max lag being considered and $T$ is number of observations.
   * p-value measures probability of results if residuals are WN.
 
 \vspace*{10cm}
-
-## `checkresiduals` function
-
-```r
-checkresiduals(naive(goog200))
-```
-
-```{r, echo=FALSE}
-object <- naive(dj2)
-main <- paste("Residuals from", object$method)
-res <- residuals(object)
-# Do Ljung-Box test
-      LBtest <- Box.test(zoo::na.approx(res), fitdf=0, lag=10, type="Ljung")
-      LBtest$method <- "Ljung-Box test"
-      LBtest$data.name <- main
-      names(LBtest$statistic) <- "Q*"
-      print(LBtest)
-      cat(paste("Model df: ",0,".   Total lags used: ",10,"\n\n",sep=""))
-```
-
-# Lab session 4
-##
-\fontsize{48}{60}\sf\centering
-**Lab Session 4**
 
 # Evaluating forecast accuracy
 
