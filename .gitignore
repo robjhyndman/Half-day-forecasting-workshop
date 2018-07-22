@@ -1,0 +1,8 @@
+*_cache
+*_files
+[0-9]*.tex
+.RData
+.Rhistory
+Labs.html
+Slides/*.R
+Slides/Rfigs

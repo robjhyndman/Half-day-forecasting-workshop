@@ -1,0 +1,79 @@
+---
+title: "Forecasting: principles and practice"
+author: "Rob J Hyndman"
+date: "Wrap up"
+fontsize: 14pt
+output:
+  beamer_presentation:
+    fig_width: 7
+    fig_height: 4.3
+    highlight: tango
+    theme: metropolis
+    includes:
+      in_header: header.tex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache=TRUE,
+  warning=FALSE,
+  message=FALSE)
+library(fpp2)
+options(digits=4, width=55)
+```
+
+
+## Workshop resources
+
+\large
+
+ * Slides
+ * Exercises
+ * Textbook
+ * Useful links
+
+\begin{alertblock}{}{\centerline{\Large\textbf{\url{robjhyndman.com/nyc2018}}}}
+\end{alertblock}
+
+
+
+
+## Useful resources for forecasters
+
+**Organization:**
+ International Institute of Forecasters.
+
+**Annual Conference:**
+ International Symposium on Forecasting, Thessaloniki, June 2019.
+
+**Journals:**
+
+\begin{tabular}{@{}ll}
+  \includegraphics[height=4.5cm]{IJFcover} & \includegraphics[height=4.5cm]{Foresight}
+\end{tabular}
+
+\begin{textblock}{4}(8.4,7.6)
+\begin{block}{}
+Links to all these at \textbf{forecasters.org}
+\end{block}
+\end{textblock}
+
+
+## Useful resources for forecasters
+
+**Blog**
+
+ * `robjhyndman.com/hyndsight`
+
+**Questions**
+
+  * `stackoverflow.com` (for R questions)
+  * `crossvalidated.com` (for statistics questions)
+
+\pause
+
+### Happy forecasting
+Good forecasters are not smarter than everyone else, they merely have their ignorance better organised.
+
+

@@ -1,0 +1,22 @@
+---
+title: "Lab Sessions: Forecasting using R"
+author: "Your name"
+date: "25 June 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, messages=FALSE, warnings=FALSE)
+library(fpp2)
+```
+
+# Lab Session 1
+
+R chunks are contained in sections like this:
+
+```{r}
+retaildata <- read.csv("retail.csv")
+mytimeseries <- ts(retaildata[,4], frequency=12, start=c(1982,4))
+```
+
+Add your comments anywhere outside R chunks.
