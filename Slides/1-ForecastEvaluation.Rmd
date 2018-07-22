@@ -21,9 +21,10 @@ knitr::opts_chunk$set(
   message=FALSE)
 library(fpp2)
 options(digits=4, width=55)
+source("nicefigs.R")
 ```
 
-# Resources
+# Introduction
 
 ## Resources
 
@@ -78,27 +79,31 @@ install.packages("fpp2", dependencies=TRUE)
 
 ## Sample futures
 
-```{r austa1, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE, fig.width=9, fig.height=5.8}
+```{r austa1, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
 fit <- ets(austa)
 df <- cbind(austa, simulate(fit,10))
-for(i in seq(9))
+for(i in seq(8))
   df <- cbind(df, simulate(fit,10))
-colnames(df) <- c("Data", paste("Future",1:10))
+colnames(df) <- c("Data", paste("Future",1:9))
 autoplot(df) +
   ylim(min(austa),10) +
   ylab("Millions of visitors") + xlab("Year") +
   ggtitle("Total international visitors to Australia") +
- scale_colour_manual(values=c('#000000',rainbow(10)),
-                     breaks=c("Data",paste("Future",1:10)),
+ scale_colour_manual(values=c('#000000',rainbow(9)),
+                     breaks=c("Data",paste("Future",1:9)),
                      name=" ") +
   ylim(.85,10.0)
 ```
 
 ## Forecast intervals
 
-```{r austa2, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE, fig.width=8.6, fig.height=6}
+```{r austa2, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE, dependson='austa1'}
 autoplot(forecast(fit)) +
+  autolayer(df) +
   ylab("Millions of visitors") + xlab("Year") +
+  scale_colour_manual(values=c('#000000',rainbow(9),'#dddddd'),
+                    breaks=c("Data",paste("Future",1:9)," "),
+                    name=" ") +
   ggtitle("Forecasts of total international visitors to Australia") +
   ylim(0.85,10.0)
 ```
@@ -225,7 +230,7 @@ autoplot(dj2) +
   * Seasonal naïve: `snaive(y, h=20)`
   * Drift: `rwf(y, drift=TRUE, h=20)`
 
-# Forecasting residuals
+# Residual diagnostics
 
 ## Fitted values
 
@@ -281,7 +286,7 @@ autoplot(goog200, series="Data") +
 ## `checkresiduals` function
 
 ```{r, echo=TRUE, fig.height=4}
-checkresiduals(naive(goog200))
+checkresiduals(naive(goog200), test=FALSE)
 ```
 
 ## ACF of residuals
@@ -292,24 +297,7 @@ checkresiduals(naive(goog200))
 
   * We *expect* these to look like white noise.
 
-## Portmanteau tests
-\fontsize{14}{14.5}\sf
-
-Test whether *set* of $r_{k}$  values are significantly different from a zero set.
-
-\begin{block}{Ljung-Box test}
-\centerline{$\displaystyle
- Q^* = T(T+2) \sum_{k=1}^h (T-k)^{-1}r_k^2$}
-where $h$  is max lag being considered and $T$ is number of observations.
-\end{block}
-
-  * My preferences: $h=10$ for non-seasonal data, $h=2m$ for seasonal data.
-  * If each $r_k$ close to zero, $Q$ will be **small**.
-  * p-value measures probability of results if residuals are WN.
-
-\vspace*{10cm}
-
-# Evaluating forecast accuracy
+# Evaluating point forecast accuracy
 
 ## Training and test sets
 
@@ -460,10 +448,6 @@ knitr::kable(tab, digits=2)
   4. If your model doesn't forecast well, you should make it more complicated.
   5. Always choose the model with the best forecast accuracy as measured on the test set.
 
-# Lab session 5
-##
-\fontsize{48}{60}\sf\centering
-**Lab Session 5**
 
 # Time series cross-validation
 
@@ -535,45 +519,24 @@ text(28,.95,"time")
 
 ## tsCV function:
 
-\small
+\fontsize{11}{11}\sf
 
 ```{r tscv, cache=TRUE}
-e <- tsCV(goog200, rwf, drift=TRUE, h=1)
-sqrt(mean(e^2, na.rm=TRUE))
-sqrt(mean(residuals(rwf(goog200, drift=TRUE))^2,
-                                     na.rm=TRUE))
+goog200 %>%
+  tsCV(forecastfunction=meanf, h=1) -> e
+e^2 %>% mean(na.rm=TRUE) %>% sqrt
+goog200 %>%
+  tsCV(forecastfunction=naive, h=1) -> e
+e^2 %>% mean(na.rm=TRUE) %>% sqrt
+goog200 %>%
+  tsCV(forecastfunction=rwf, drift=TRUE, h=1) -> e
+e^2 %>% mean(na.rm=TRUE) %>% sqrt
 ```
 
 \begin{alertblock}{}
 A good way to choose the best forecasting model is to find the model with the smallest RMSE computed using time series cross-validation.
 \end{alertblock}
 
-## Pipe function
-
-\fontsize{12}{15}\sf
-
-Ugly code:
-```r
-e <- tsCV(goog200, rwf, drift=TRUE, h=1)
-sqrt(mean(e^2, na.rm=TRUE))
-sqrt(mean(residuals(rwf(goog200, drift=TRUE))^2,
-                                     na.rm=TRUE))
-```
-
-Better with a pipe:
-
-```r
-goog200 %>%
-  tsCV(forecastfunction=rwf, drift=TRUE, h=1) -> e
-e^2 %>% mean(na.rm=TRUE) %>% sqrt
-goog200 %>% rwf(drift=TRUE) %>% residuals -> res
-res^2 %>% mean(na.rm=TRUE) %>% sqrt
-```
-
-# Lab session 6
-##
-\fontsize{48}{60}\sf\centering
-**Lab Session 6**
 
 # Prediction intervals
 
@@ -626,3 +589,65 @@ Assume residuals are normal, uncorrelated, sd = $\hat\sigma$:
 where $k$ is the integer part of $(h-1)/m$.
 
 Note that when $h=1$ and $T$ is large, these all give the same approximate value $\hat\sigma$.
+
+# Evaluating forecast distributions
+
+## Evaluating prediction intervals
+
+\begin{block}{Winkler score}
+If the $100(1-\alpha)$\% prediction interval is given by $[\ell,u]$, and the observed value is $y$, then the Winkler interval score is
+ $$ (u-\ell) +  \textstyle\frac{2}{\alpha}(\ell-y)1(y < \ell) +  \frac{2}{\alpha}(y-u)1(y > u).$$
+\end{block}
+
+ * penalizes for wide intervals (since $u-\ell$ will be large);
+ * penalizes for non-coverage with observations well outside the interval being penalized more heavily.
+
+## Evaluating quantile forecasts
+
+Let $q_p$ be the quantile forecast with probability $1-p$ of exceedance.
+\begin{block}{Pin-ball loss function}
+$$
+L(q_p, y) =
+(1 - p) (q_p - y) 1(y < q_p) + p (y - q_p) 1 ( y \ge q_p).
+$$
+\end{block}
+
+ * average over all target quantiles (e.g., 0.01, 0.02, \dots, 0.99) and all forecast horizons.
+
+ * Reference: Gneiting and Raftery (JASA, 2007)
+
+## Evaluating quantile forecasts
+
+```{r pinball1, echo=FALSE}
+pinball <- function(p) {
+  res <- 999
+  x <- seq(0,11,l=res)
+  y <- dlnorm(x)
+  plot(x,y, type='n', xlab="y",ylab="f(y)", xaxt='n',yaxt='n',xlim=c(0,10))
+  qp <- qlnorm(p)
+  xx <- seq(0,qp,l=res)
+  yy <- dlnorm(xx)
+  polygon(c(xx,rev(xx)), c(yy,rep(0,res)), col='gray',border=FALSE)
+  xx <- seq(qp,11,l=res)
+  yy <- dlnorm(xx)
+  polygon(c(xx,rev(xx)), c(yy,rep(0,res)), col='red',border=FALSE)
+  L <- (1-p)*pmax((qp-x),0) + p*pmax(x-qp,0)
+  lines(x,L,col='blue',lwd=2)
+  axis(side=1,at=qp, label=bquote(q[.(p)]))
+  text(min(0.5,max(qp-.4,0)),0.05,paste0(round(p*100),"%"),col='black')
+  text(min(qp+1,10),0.05,paste0(round((1-p)*100),"%"),col='black')
+  text(3.8,0.5,expression(L(q[p],y)), col='blue')
+}
+for(i in seq(99))
+{
+  savepdf(paste0("pinball",i))
+  pinball(i/100)
+  endpdf()
+}
+```
+
+\vspace*{0.2cm}
+
+\centerline{\animategraphics[controls,buttonsize=0.3cm,width=12.2cm]{4}{pinball}{1}{99}}
+
+
