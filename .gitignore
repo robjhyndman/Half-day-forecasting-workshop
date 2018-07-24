@@ -1,6 +1,7 @@
 *_cache
 *_files
 [0-9]*.tex
+[0-9]*.R
 .RData
 .Rhistory
 Labs.html
