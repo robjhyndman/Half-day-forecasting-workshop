@@ -230,6 +230,57 @@ autoplot(dj2) +
   * Seasonal naïve: `snaive(y, h=20)`
   * Drift: `rwf(y, drift=TRUE, h=20)`
 
+## Prediction intervals
+\fontsize{14}{15}\sf
+
+ * A forecast $\hat{y}_{T+h|T}$ is (usually) the mean of the conditional distribution $y_{T+h} \mid y_1, \dots, y_{T}$.
+ * A prediction interval gives a region within which we expect $y_{T+h}$ to lie with a specified probability.
+ * Assuming forecast errors are normally distributed, then a 95% PI is
+ \begin{alertblock}{}
+\centerline{$
+  \hat{y}_{T+h|T} \pm 1.96 \hat\sigma_h
+$}
+\end{alertblock}
+where $\hat\sigma_h$ is the st dev of the $h$-step distribution.
+
+ * When $h=1$, $\hat\sigma_h$ can be estimated from the residuals.
+
+## Prediction intervals
+
+**Drift forecasts with prediction interval:**
+
+```{r djforecasts, echo=TRUE, cache=TRUE}
+rwf(goog200, level=95, drift=TRUE)
+```
+
+## Prediction intervals
+
+ * Point forecasts are often useless without prediction intervals.
+ * Prediction intervals require a stochastic model (with random errors, etc).
+ * Multi-step forecasts for time series require a more sophisticated approach (with PI getting wider as the forecast horizon increases).
+  * Check residual assumptions before believing them.
+  * Usually too narrow due to unaccounted uncertainty.
+
+## Prediction intervals
+
+\fontsize{14}{18}\sf
+
+Assume residuals are normal, uncorrelated, sd = $\hat\sigma$:
+
+\begin{block}{}
+\begin{tabular}{ll}
+\bf Mean forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{1 + 1/T}$\\[0.2cm]
+\bf Naïve forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{h}$\\[0.2cm]
+\bf Seasonal naïve forecasts & $\hat\sigma_h = \hat\sigma\sqrt{k+1}$\\[0.2cm]
+\bf Drift forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{h(1+h/T)}$.
+\end{tabular}
+\end{block}
+
+where $k$ is the integer part of $(h-1)/m$.
+
+Note that when $h=1$ and $T$ is large, these all give the same approximate value $\hat\sigma$.
+
+
 # Residual diagnostics
 
 ## Fitted values
@@ -289,15 +340,12 @@ autoplot(goog200, series="Data") +
 checkresiduals(naive(goog200), test=FALSE)
 ```
 
-## ACF of residuals
+# Lab Session 1
+##
+\fontsize{48}{60}\sf\centering
+**Lab Session 1**
 
-  * We assume that the residuals are white noise (uncorrelated, mean zero, constant variance). If they aren't, then there is information left in  the residuals that should be used in computing forecasts.
-
-  * So a standard residual diagnostic is to check the ACF of the residuals of a forecasting method.
-
-  * We *expect* these to look like white noise.
-
-# Evaluating point forecast accuracy
+# Evaluating forecast accuracy
 
 ## Training and test sets
 
@@ -449,148 +497,11 @@ knitr::kable(tab, digits=2)
   5. Always choose the model with the best forecast accuracy as measured on the test set.
 
 
-# Time series cross-validation
+# Lab Session 2
+##
+\fontsize{48}{60}\sf\centering
+**Lab Session 2**
 
-## Time series cross-validation
-
-**Traditional evaluation**
-
-```{r traintest2, fig.height=1, echo=FALSE, cache=TRUE}
-train = 1:18
-test = 19:24
-par(mar=c(0,0,0,0))
-plot(0,0,xlim=c(0,26),ylim=c(0,2),xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
-arrows(0,0.5,25,0.5,0.05)
-points(train, train*0+0.5, pch=19, col="blue")
-points(test,  test*0+0.5,  pch=19, col="red")
-text(26,0.5,"time")
-text(10,1,"Training data",col="blue")
-text(21,1,"Test data",col="red")
-```
-
-\vspace*{10cm}
-
-## Time series cross-validation
-
-**Traditional evaluation**
-
-```{r traintest3, fig.height=1, echo=FALSE, cache=TRUE}
-train = 1:18
-test = 19:24
-par(mar=c(0,0,0,0))
-plot(0,0,xlim=c(0,26),ylim=c(0,2),xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
-arrows(0,0.5,25,0.5,0.05)
-points(train, train*0+0.5, pch=19, col="blue")
-points(test,  test*0+0.5,  pch=19, col="red")
-text(26,0.5,"time")
-text(10,1,"Training data",col="blue")
-text(21,1,"Test data",col="red")
-```
-
-**Time series cross-validation**
-
-```{r cv1, cache=TRUE, echo=FALSE, fig.height=4}
-par(mar=c(0,0,0,0))
-plot(0,0,xlim=c(0,28),ylim=c(0,1),
-       xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
-i <- 1
-for(j in 1:10)
-{
-  test <- (16+j):26
-  train <- 1:(15+j)
-  arrows(0,1-j/20,27,1-j/20,0.05)
-  points(train,rep(1-j/20,length(train)),pch=19,col="blue")
-  if(length(test) >= i)
-    points(test[i], 1-j/20, pch=19, col="red")
-  if(length(test) >= i)
-    points(test[-i], rep(1-j/20,length(test)-1), pch=19, col="gray")
-  else
-    points(test, rep(1-j/20,length(test)), pch=19, col="gray")
-}
-text(28,.95,"time")
-```
-
-\pause\fontsize{12}{14}\sf
-
- * Forecast accuracy averaged over test sets.
- * Also known as "evaluation on a rolling forecasting origin"
-
- \vspace*{10cm}
-
-## tsCV function:
-
-\fontsize{11}{11}\sf
-
-```{r tscv, cache=TRUE}
-goog200 %>%
-  tsCV(forecastfunction=meanf, h=1) -> e
-e^2 %>% mean(na.rm=TRUE) %>% sqrt
-goog200 %>%
-  tsCV(forecastfunction=naive, h=1) -> e
-e^2 %>% mean(na.rm=TRUE) %>% sqrt
-goog200 %>%
-  tsCV(forecastfunction=rwf, drift=TRUE, h=1) -> e
-e^2 %>% mean(na.rm=TRUE) %>% sqrt
-```
-
-\begin{alertblock}{}
-A good way to choose the best forecasting model is to find the model with the smallest RMSE computed using time series cross-validation.
-\end{alertblock}
-
-
-# Prediction intervals
-
-## Prediction intervals
-\fontsize{14}{15}\sf
-
- * A forecast $\hat{y}_{T+h|T}$ is (usually) the mean of the conditional distribution $y_{T+h} \mid y_1, \dots, y_{T}$.
- * A prediction interval gives a region within which we expect $y_{T+h}$ to lie with a specified probability.
- * Assuming forecast errors are normally distributed, then a 95% PI is
- \begin{alertblock}{}
-\centerline{$
-  \hat{y}_{T+h|T} \pm 1.96 \hat\sigma_h
-$}
-\end{alertblock}
-where $\hat\sigma_h$ is the st dev of the $h$-step distribution.
-
- * When $h=1$, $\hat\sigma_h$ can be estimated from the residuals.
-
-## Prediction intervals
-
-**Drift forecasts with prediction interval:**
-
-```{r djforecasts, echo=TRUE, cache=TRUE}
-rwf(goog200, level=95, drift=TRUE)
-```
-
-## Prediction intervals
-
- * Point forecasts are often useless without prediction intervals.
- * Prediction intervals require a stochastic model (with random errors, etc).
- * Multi-step forecasts for time series require a more sophisticated approach (with PI getting wider as the forecast horizon increases).
-  * Check residual assumptions before believing them.
-  * Usually too narrow due to unaccounted uncertainty.
-
-## Prediction intervals
-
-\fontsize{14}{18}\sf
-
-Assume residuals are normal, uncorrelated, sd = $\hat\sigma$:
-
-\begin{block}{}
-\begin{tabular}{ll}
-\bf Mean forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{1 + 1/T}$\\[0.2cm]
-\bf Naïve forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{h}$\\[0.2cm]
-\bf Seasonal naïve forecasts & $\hat\sigma_h = \hat\sigma\sqrt{k+1}$\\[0.2cm]
-\bf Drift forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{h(1+h/T)}$.
-\end{tabular}
-\end{block}
-
-where $k$ is the integer part of $(h-1)/m$.
-
-Note that when $h=1$ and $T$ is large, these all give the same approximate value $\hat\sigma$.
-
-# Evaluating forecast distributions
 
 ## Evaluating prediction intervals
 
@@ -601,6 +512,7 @@ If the $100(1-\alpha)$\% prediction interval is given by $[\ell,u]$, and the obs
 
  * penalizes for wide intervals (since $u-\ell$ will be large);
  * penalizes for non-coverage with observations well outside the interval being penalized more heavily.
+
 
 ## Evaluating quantile forecasts
 
