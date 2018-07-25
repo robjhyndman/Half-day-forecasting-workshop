@@ -71,42 +71,8 @@ install.packages("fpp2", dependencies=TRUE)
   1~    Forecast evaluation         & 3 \\
   2~    ARIMA models                & 8 \\
   3~    Dynamic regression          & 9 \\
-  4~    Hierarchical forecasting    & 10 \\
-  5~    Ensembles                   & 12
+  4~    Hierarchical forecasting    & 10
 \end{tabular}
-
-# The statistical forecasting perspective
-
-## Sample futures
-
-```{r austa1, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
-fit <- ets(austa)
-df <- cbind(austa, simulate(fit,10))
-for(i in seq(8))
-  df <- cbind(df, simulate(fit,10))
-colnames(df) <- c("Data", paste("Future",1:9))
-autoplot(df) +
-  ylim(min(austa),10) +
-  ylab("Millions of visitors") + xlab("Year") +
-  ggtitle("Total international visitors to Australia") +
- scale_colour_manual(values=c('#000000',rainbow(9)),
-                     breaks=c("Data",paste("Future",1:9)),
-                     name=" ") +
-  ylim(.85,10.0)
-```
-
-## Forecast intervals
-
-```{r austa2, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE, dependson='austa1'}
-autoplot(forecast(fit)) +
-  autolayer(df) +
-  ylab("Millions of visitors") + xlab("Year") +
-  scale_colour_manual(values=c('#000000',rainbow(9),'#dddddd'),
-                    breaks=c("Data",paste("Future",1:9)," "),
-                    name=" ") +
-  ggtitle("Forecasts of total international visitors to Australia") +
-  ylim(0.85,10.0)
-```
 
 
 # Benchmark methods
@@ -229,56 +195,6 @@ autoplot(dj2) +
   * Naïve:  `naive(y, h=20)`
   * Seasonal naïve: `snaive(y, h=20)`
   * Drift: `rwf(y, drift=TRUE, h=20)`
-
-## Prediction intervals
-\fontsize{14}{15}\sf
-
- * A forecast $\hat{y}_{T+h|T}$ is (usually) the mean of the conditional distribution $y_{T+h} \mid y_1, \dots, y_{T}$.
- * A prediction interval gives a region within which we expect $y_{T+h}$ to lie with a specified probability.
- * Assuming forecast errors are normally distributed, then a 95% PI is
- \begin{alertblock}{}
-\centerline{$
-  \hat{y}_{T+h|T} \pm 1.96 \hat\sigma_h
-$}
-\end{alertblock}
-where $\hat\sigma_h$ is the st dev of the $h$-step distribution.
-
- * When $h=1$, $\hat\sigma_h$ can be estimated from the residuals.
-
-## Prediction intervals
-
-**Drift forecasts with prediction interval:**
-
-```{r djforecasts, echo=TRUE, cache=TRUE}
-rwf(goog200, level=95, drift=TRUE)
-```
-
-## Prediction intervals
-
- * Point forecasts are often useless without prediction intervals.
- * Prediction intervals require a stochastic model (with random errors, etc).
- * Multi-step forecasts for time series require a more sophisticated approach (with PI getting wider as the forecast horizon increases).
-  * Check residual assumptions before believing them.
-  * Usually too narrow due to unaccounted uncertainty.
-
-## Prediction intervals
-
-\fontsize{14}{18}\sf
-
-Assume residuals are normal, uncorrelated, sd = $\hat\sigma$:
-
-\begin{block}{}
-\begin{tabular}{ll}
-\bf Mean forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{1 + 1/T}$\\[0.2cm]
-\bf Naïve forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{h}$\\[0.2cm]
-\bf Seasonal naïve forecasts & $\hat\sigma_h = \hat\sigma\sqrt{k+1}$\\[0.2cm]
-\bf Drift forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{h(1+h/T)}$.
-\end{tabular}
-\end{block}
-
-where $k$ is the integer part of $(h-1)/m$.
-
-Note that when $h=1$ and $T$ is large, these all give the same approximate value $\hat\sigma$.
 
 
 # Residual diagnostics
@@ -501,6 +417,90 @@ knitr::kable(tab, digits=2)
 ##
 \fontsize{48}{60}\sf\centering
 **Lab Session 2**
+
+
+# Forecast densities
+
+## Sample futures
+
+```{r austa1, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+fit <- ets(austa)
+df <- cbind(austa, simulate(fit,10))
+for(i in seq(8))
+  df <- cbind(df, simulate(fit,10))
+colnames(df) <- c("Data", paste("Future",1:9))
+autoplot(df) +
+  ylim(min(austa),10) +
+  ylab("Millions of visitors") + xlab("Year") +
+  ggtitle("Total international visitors to Australia") +
+ scale_colour_manual(values=c('#000000',rainbow(9)),
+                     breaks=c("Data",paste("Future",1:9)),
+                     name=" ") +
+  ylim(.85,10.0)
+```
+
+## Prediction intervals
+
+```{r austa2, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE, dependson='austa1'}
+autoplot(forecast(fit)) +
+  autolayer(df) +
+  ylab("Millions of visitors") + xlab("Year") +
+  scale_colour_manual(values=c('#000000',rainbow(9),'#dddddd'),
+                    breaks=c("Data",paste("Future",1:9)," "),
+                    name=" ") +
+  ggtitle("Forecasts of total international visitors to Australia") +
+  ylim(0.85,10.0)
+```
+
+## Prediction intervals
+\fontsize{14}{15}\sf
+
+ * A forecast $\hat{y}_{T+h|T}$ is (usually) the mean of the conditional distribution $y_{T+h} \mid y_1, \dots, y_{T}$.
+ * A prediction interval gives a region within which we expect $y_{T+h}$ to lie with a specified probability.
+ * Assuming forecast errors are normally distributed, then a 95% PI is
+ \begin{alertblock}{}
+\centerline{$
+  \hat{y}_{T+h|T} \pm 1.96 \hat\sigma_h
+$}
+\end{alertblock}
+where $\hat\sigma_h$ is the st dev of the $h$-step distribution.
+
+ * When $h=1$, $\hat\sigma_h$ can be estimated from the residuals.
+
+## Prediction intervals
+
+**Drift forecasts with prediction interval:**
+
+```{r djforecasts, echo=TRUE, cache=TRUE}
+rwf(goog200, level=95, drift=TRUE)
+```
+
+## Prediction intervals
+
+ * Point forecasts are often useless without prediction intervals.
+ * Prediction intervals require a stochastic model (with random errors, etc).
+ * Multi-step forecasts for time series require a more sophisticated approach (with PI getting wider as the forecast horizon increases).
+  * Check residual assumptions before believing them.
+  * Usually too narrow due to unaccounted uncertainty.
+
+## Prediction intervals
+
+\fontsize{14}{18}\sf
+
+Assume residuals are normal, uncorrelated, sd = $\hat\sigma$:
+
+\begin{block}{}
+\begin{tabular}{ll}
+\bf Mean forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{1 + 1/T}$\\[0.2cm]
+\bf Naïve forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{h}$\\[0.2cm]
+\bf Seasonal naïve forecasts & $\hat\sigma_h = \hat\sigma\sqrt{k+1}$\\[0.2cm]
+\bf Drift forecasts: & $\hat\sigma_h = \hat\sigma\sqrt{h(1+h/T)}$.
+\end{tabular}
+\end{block}
+
+where $k$ is the integer part of $(h-1)/m$.
+
+Note that when $h=1$ and $T$ is large, these all give the same approximate value $\hat\sigma$.
 
 
 ## Evaluating prediction intervals
