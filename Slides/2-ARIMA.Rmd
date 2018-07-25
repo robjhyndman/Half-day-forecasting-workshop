@@ -50,7 +50,7 @@ A **stationary series** is:\vspace*{-0.4cm}
 \fontsize{11}{11}\sf
 
 ```{r}
-dj %>% autoplot() + 
+dj %>% autoplot() +
   ylab("Dow Jones Index") + xlab("Day")
 ```
 
@@ -58,7 +58,7 @@ dj %>% autoplot() +
 \fontsize{11}{11}\sf
 
 ```{r}
-dj %>% diff() %>% autoplot() + 
+dj %>% diff() %>% autoplot() +
   ylab("Change in Dow Jones Index") + xlab("Day")
 ```
 
@@ -66,7 +66,7 @@ dj %>% diff() %>% autoplot() +
 \fontsize{11}{11}\sf
 
 ```{r}
-hsales %>% autoplot() + 
+hsales %>% autoplot() +
   xlab("Year") + ylab("Total sales") +
   ggtitle("Sales of new one-family houses, USA")
 ```
@@ -121,7 +121,7 @@ usmelec %>% log() %>% diff(lag=12) %>%
 
 **Shift back one period**
 $$
-{B y_{t} = y_{t - 1}} 
+{B y_{t} = y_{t - 1}}
 $$\pause
 
 **Shift back two periods**:
@@ -152,13 +152,14 @@ $$
 ## Autoregressive models
 
 \begin{block}{Autoregressive (AR) models:}
-$$
-  y_{t} = c + \phi_{1}y_{t - 1} + \phi_{2}y_{t - 2} + \cdots + \phi_{p}y_{t - p} + \varepsilon_{t},
-$$
+\begin{align*}
+  y_{t} = c + \phi_{1}y_{t - 1} + \phi_{2}y_{t - 2} + \cdots + \phi_{p}y_{t - p} + \varepsilon_{t}\\
+  (1-\phi_1B - \cdots - \phi_p B^p)y_t = c+\varepsilon_t
+\end{align*}
 where $\varepsilon_t$ is white noise. This is a multiple regression with \textbf{lagged values} of $y_t$ as predictors.
 \end{block}
 
-```{r arp, echo=FALSE, fig.height=3}
+```{r arp, echo=FALSE, fig.height=2.5}
 set.seed(1)
 p1 <- autoplot(10 + arima.sim(list(ar = -0.8), n = 100)) +
   ylab("") + ggtitle("AR(1)")
@@ -184,12 +185,13 @@ Complex roots of $1-\phi_1 z - \phi_2 z^2 - \dots - \phi_pz^p$ lie outside the u
 ## Moving Average (MA) models
 
 \begin{block}{Moving Average (MA) models:}
-$$
-  y_{t} = c + \varepsilon_t + \theta_{1}\varepsilon_{t - 1} + \theta_{2}\varepsilon_{t - 2} + \cdots + \theta_{q}\varepsilon_{t - q},
-$$
+\begin{align*}
+  y_{t} &= c + \varepsilon_t + \theta_{1}\varepsilon_{t - 1} + \theta_{2}\varepsilon_{t - 2} + \cdots + \theta_{q}\varepsilon_{t - q}\\
+  y_t &= c + (1+\theta_1B + \cdots + \theta_1B^q)\varepsilon_t
+\end{align*}
 where $\varepsilon_t$ is white noise.
 This is a multiple regression with \textbf{past \emph{errors}}
-as predictors. \emph{Don't confuse this with moving average smoothing!}
+as predictors.
 \end{block}
 
 ```{r maq, fig.height=2.5, echo=FALSE}
@@ -218,16 +220,17 @@ Complex roots of $1+\theta_1 z + \theta_2 z^2 + \dots + \theta_qz^q$ lie outside
 
 ## ARIMA models
 
-\begin{block}{Autoregressive Moving Average models:}\vspace*{-0.2cm}
+\begin{block}{Autoregressive Moving Average models:}\vspace*{-0.2cm}\fontsize{14}{14}\sf
 \begin{align*}
 y_{t} &= c + \phi_{1}y_{t - 1} + \cdots + \phi_{p}y_{t - p} \\
-& \hspace*{2.4cm}\text{} + \theta_{1}e_{t - 1} + \cdots + \theta_{q}e_{t - q} + e_{t}.
+& \hspace*{2.4cm}\text{} + \theta_{1}\varepsilon_{t - 1} + \cdots + \theta_{q}\varepsilon_{t - q} + \varepsilon_{t}\\
+\phi_p(B) y_t &= \theta_q(B)\varepsilon_t
 \end{align*}
-\end{block}\pause
+\end{block}\pause\vspace*{-0.3cm}
 
 * Predictors include both **lagged values of $y_t$ and lagged errors.**
-* Conditions on coefficients ensure stationarity.
-* Conditions on coefficients ensure invertibility.
+* $\phi_p(B)$ is a $p$th order polynomial in $B$
+* $\theta_q(B)$ is a $q$th order polynomial in $B$
 \pause
 
 ### Autoregressive Integrated Moving Average models
@@ -253,7 +256,7 @@ MA:& $q =$ order of the moving average part.
 
 ## Backshift notation for ARIMA
 
-* ARIMA($p,q$) model:\vspace*{-1cm}\newline
+* ARIMA($p,0,q$) model:\vspace*{-1cm}\newline
 \parbox{12cm}{\small\begin{align*}
 \hspace*{-1cm}
 y_{t} &= c + \phi_{1}y_{t - 1} + \cdots + \phi_{p}y_{t - p} + \theta_{1}\varepsilon_{t - 1} + \cdots + \theta_{q}\varepsilon_{t - q} + \varepsilon_{t} \\
@@ -262,7 +265,7 @@ y_{t} &= c + \phi_{1}By_{t} + \cdots + \phi_pB^py_{t}
            + \varepsilon_{t} + \theta_{1}B\varepsilon_{t} + \cdots + \theta_qB^q\varepsilon_{t} \\
 \hspace*{-1cm}
 \text{or}\quad & (1-\phi_1B - \cdots - \phi_p B^p) y_t = c + (1 + \theta_1 B + \cdots + \theta_q B^q)\varepsilon_t
-\end{align*}}
+\end{align*}}\pause
 
 * ARIMA(1,1,1) model:
 \[
@@ -278,20 +281,23 @@ $$y_t =  c + y_{t-1} + \phi_1 y_{t-1}- \phi_1 y_{t-2} + \theta_1\varepsilon_{t-1
 
 ## R model
 
-\fontsize{13}{16}\sf
+\fontsize{12}{14}\sf
 
 \begin{block}{Intercept form}
-\centerline{$(1-\phi_1B - \cdots - \phi_p B^p) y_t' = c + (1 + \theta_1 B + \cdots + \theta_q B^q)\varepsilon_t$}
+$$(1-\phi_1B - \cdots - \phi_p B^p)(1-B)^d y_t = c + (1 + \theta_1 B + \cdots + \theta_q B^q)\varepsilon_t$$
 \end{block}
 
 \begin{block}{Mean form}
-\centerline{$(1-\phi_1B - \cdots - \phi_p B^p)(y_t' - \mu) = (1 + \theta_1 B + \cdots + \theta_q B^q)\varepsilon_t$}
-\end{block}
+\begin{align*}
+(1-\phi_1B - \cdots - \phi_p B^p)(1-B)^d (y_t - \mu t^d/d!) &= \\
+&\hspace*{-1cm} (1 + \theta_1 B + \cdots + \theta_q B^q)\varepsilon_t
+\end{align*}
+\end{block}\fontsize{14}{16}\sf
 
- * $y_t' = (1-B)^d y_t$
- * $\mu$ is the mean of $y_t'$.
+ * $\mu$ is the mean of $(1-B)^dy_t$.
  * $c = \mu(1-\phi_1 - \cdots - \phi_p )$.
  * R uses mean form.
+ * Including $c$ equivalent to $y_t$ having $d$th order polynomial trend.
 
 ## US personal consumption
 \fontsize{11}{11}\sf

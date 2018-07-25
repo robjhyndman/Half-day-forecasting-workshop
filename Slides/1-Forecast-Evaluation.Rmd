@@ -308,7 +308,7 @@ tmp <- cbind(Data=goog200,
              Drift=googfc3[["mean"]])
 autoplot(tmp) + xlab("Day") + ylab("Price") +
   ggtitle("Forecasts for GOOG stock price") +
-  scale_color_manual(values=c('#000000','#1b9e77','#d95f02','#7570b3'),
+  scale_colour_manual(values=c('#000000','#1b9e77','#d95f02','#7570b3'),
                      breaks=c("Mean","Naive","Drift"),
                      name="Forecast Method")
 ```
@@ -374,7 +374,7 @@ works well. Then MASE is equivalent to MAE relative to a seasonal naïve method.
 ```{r googaccuracyagain, echo=FALSE, fig.height=5, dependson="googaccuracy"}
 autoplot(tmp) + xlab("Day") + ylab("Price") +
   ggtitle("Forecasts for GOOG stock price") +
-  scale_color_manual(values=c('#000000','#1b9e77','#d95f02','#7570b3'),
+  scale_colour_manual(values=c('#000000','#1b9e77','#d95f02','#7570b3'),
                      breaks=c("Mean","Naive","Drift"),
                      name="Forecast Method")
 ```
