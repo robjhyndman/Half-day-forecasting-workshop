@@ -23,7 +23,6 @@ library(fpp2)
 options(digits=4, width=55)
 ```
 
-
 ## Workshop resources
 
 \large
@@ -33,47 +32,24 @@ options(digits=4, width=55)
  * Textbook
  * Useful links
 
-\begin{alertblock}{}{\centerline{\Large\textbf{\url{robjhyndman.com/nyc2018}}}}
+\vspace*{1cm}\begin{alertblock}{}{\centerline{\large\textbf{\url{robjhyndman.com/acemsforecasting2018}}}}
 \end{alertblock}
 
-
-
-
 ## Useful resources for forecasters
+\fontsize{13}{14}\sf
 
-**Organization:**
- International Institute of Forecasters.
-
-**Annual Conference:**
- International Symposium on Forecasting, Thessaloniki, June 2019.
-
-**Journals:**
-
-\begin{tabular}{@{}ll}
-  \includegraphics[height=4.5cm]{IJFcover} & \includegraphics[height=4.5cm]{Foresight}
+\hspace*{-0.5cm}\begin{tabular}{@{}lp{7cm}}
+\alert{Datacamp course:} & \texttt{bit.ly/dcforecasting} \\[0.3cm]
+\alert{Organization:} &\RaggedRight International Institute of Forecasters. \texttt{forecasters.org} \\[0.3cm]
+\alert{Annual Conference:} &\RaggedRight International Symposium on Forecasting, Thessaloniki, June 2019. \texttt{isf.forecasters.org} \\[0.3cm]
+\alert{Blog:} & \texttt{robjhyndman.com/hyndsight} \\[0.3cm]
+\alert{Finding information:} & \texttt{fpc.forecasters.org} \\[0.3cm]
+\alert{Questions on R:} & \texttt{stackoverflow.com} \\[0.3cm]
+\alert{Questions on statistics:} & \texttt{crossvalidated.com}
 \end{tabular}
 
-\begin{textblock}{4}(8.4,7.6)
-\begin{block}{}
-Links to all these at \textbf{forecasters.org}
-\end{block}
-\end{textblock}
-
-
-## Useful resources for forecasters
-
-**Blog**
-
- * `robjhyndman.com/hyndsight`
-
-**Questions**
-
-  * `stackoverflow.com` (for R questions)
-  * `crossvalidated.com` (for statistics questions)
-
-\pause
+\pause\vspace*{1cm}
 
 ### Happy forecasting
 Good forecasters are not smarter than everyone else, they merely have their ignorance better organised.
-
 
