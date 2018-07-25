@@ -14,7 +14,8 @@ RTARGETS=$(SOURCES:%.Rmd=%.R)
 default: $(pdfTARGETS) $(RTARGETS)
 
 clean:
-	rm -rfv $(TARGETS)
+	rm -rfv $(pdfTARGETS)
+	rm -rfv $(RTARGETS)
 	latexmk -c
 	rm -rf *_cache/
 	rm -rf *_files/
