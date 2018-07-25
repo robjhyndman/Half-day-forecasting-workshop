@@ -1,7 +1,7 @@
 ---
 title: "Forecasting: principles and practice"
 author: "Rob J Hyndman"
-date: "3.3&nbsp; Hierarchical forecasting"
+date: "4&nbsp; Hierarchical forecasting"
 fontsize: 14pt
 output:
   beamer_presentation:
@@ -204,293 +204,6 @@ A \alert{\textbf{grouped time series}} is a collection of time series that can b
 1. Forecast all series at all levels of aggregation using an automatic forecasting algorithm.\newline (e.g., `ets`, `auto.arima`, ...)
 2. Reconcile the resulting forecasts so they add up correctly using least squares optimization (i.e., find closest reconciled forecasts to the original forecasts).
 3. This is available in the \textbf{hts} package in R.
-
-# hts package for R
-
-## hts package for R
-\placefig{9.5}{1}{width=2cm}{Rlogo}
-
-\begin{textblock}{12.}(0.5,1.5)\fontsize{11}{14}\sf
-\alert{hts: Hierarchical and Grouped Time Series}
-
-Methods for analysing and forecasting hierarchical and grouped time series\vspace*{0.1cm}
-
-\tabcolsep=0.1cm
-\begin{tabular}{@{}ll}
-Version: & 5.1.5\\
-Depends: & R ($\ge$ 3.2.0), forecast ($\ge$ 8.1) \\
-Imports: & SparseM, Matrix, matrixcalc, parallel, utils, methods, graphics, grDevices, stats\\
-LinkingTo: & Rcpp ($\ge$ 0.11.0), RcppEigen\\
-Suggests: &testthat, knitr, rmarkdown\\
-Published: & 2018-03-26\\
-Author: &Rob J Hyndman, Alan Lee, Earo Wang, Shanika Wickramasuriya\\
-Maintainer: &Rob J Hyndman $<$Earo.Wang at gmail.com$>$\\
-BugReports: & \url{https://github.com/earowang/hts/issues} \\
-License: & GPL ($\ge2$) \\
-URL: & \url{http://pkg.earo.me/hts}
-\end{tabular}
-\end{textblock}
-
-## Example using R
-\fontsize{10}{10}\sf
-
-```r
-library(hts)
-
-# bts is a matrix containing the bottom level time series
-# nodes describes the hierarchical structure
-y <- hts(bts, nodes=list(2, c(3,2)))
-```
-
-\only<2>{\begin{textblock}{5}(7,3.5){\begin{block}{}\centering\small
-\begin{tikzpicture}[level distance=1cm]
-\tikzstyle{every node}=[ellipse,draw,fill=red!15,inner sep=2pt]
-\tikzstyle[level distance=.01cm]
-\tikzstyle[sibling distance=4cm]
-\tikzstyle{level 2}=[sibling distance=10mm,font=\scriptsize,set style={{every node}+=[fill=yellow]}]
-\tikzstyle{level 1}=[sibling distance=30mm,font=\footnotesize,set style={{every node}+=[fill=blue!15]}]
-\node{Total}[edge from parent fork down]
- child {node {A}
-   child {node {AX}}
-   child {node {AY}}
-   child {node {AZ}}
- }
- child {node {B}
-   child {node {BX}}
-   child {node {BY}}
- };
-\end{tikzpicture}\end{block}}\end{textblock}}
-
-\vspace*{10cm}
-
-## Example using R
-\fontsize{10}{10}\sf
-
-```r
-library(hts)
-
-# bts is a matrix containing the bottom level time series
-# nodes describes the hierarchical structure
-y <- hts(bts, nodes=list(2, c(3,2)))
-```
-
-\begin{textblock}{5}(7,3.5){\begin{block}{}\centering\small
-\begin{tikzpicture}[level distance=1cm]
-\tikzstyle{every node}=[ellipse,draw,fill=red!15,inner sep=2pt]
-\tikzstyle[level distance=.01cm]
-\tikzstyle[sibling distance=4cm]
-\tikzstyle{level 2}=[sibling distance=10mm,font=\scriptsize,set style={{every node}+=[fill=yellow]}]
-\tikzstyle{level 1}=[sibling distance=30mm,font=\footnotesize,set style={{every node}+=[fill=blue!15]}]
-\node{Total}[edge from parent fork down]
- child {node {A}
-   child {node {AX}}
-   child {node {AY}}
-   child {node {AZ}}
- }
- child {node {B}
-   child {node {BX}}
-   child {node {BY}}
- };
-\end{tikzpicture}\end{block}}\end{textblock}
-
-\vspace*{3.4cm}
-
-```r
-# Forecast 10-step-ahead using WLS combination method
-# ETS used for each series by default
-fc <- forecast(y, h=10)
-```
-
-\vspace*{10cm}
-
-## forecast.gts() function
-\fontsize{10}{10}\sf
-
-\alert{Usage}
-
-```r
-forecast(object, h,
-  method = c("comb", "bu", "mo", "tdgsf", "tdgsa", "tdfp"),
-  fmethod = c("ets", "rw", "arima"),
-  weights = c("wls", "ols", "mint", "nseries"),
-  covariance = c("shr","sam"),
-  positive = TRUE,
-  parallel = FALSE, num.cores = 2, ...)
-```
-
-\vspace*{-0.2cm}
-
-\alert{Arguments}\vspace*{-0.2cm}
-
-\begin{tabular}{lp{9.4cm}}
-\Verb|object| & Hierarchical time series object of class \texttt{gts}.\\
-\Verb|h| & Forecast horizon\\
-\Verb|method| & Method for distributing forecasts within the hierarchy. \\
-\Verb|fmethod| & Forecasting method to use\\
-\Verb|weights| & Weights used for "optimal combination" method. \\
-\Verb|covariance| & Shrinkage estimator or sample estimator for GLS covariance.\\
-\Verb|positive| & If TRUE, forecasts are forced to be strictly positive\\
-\Verb|parallel| & If TRUE, allow parallel processing\\
-\Verb|num.cores| & If parallel = TRUE, specify how many cores to be used
-\end{tabular}
-
-# Application: Australian tourism
-
-## Australian tourism
-\full{regions1_with_labels}
-\only<3-4>{\begin{textblock}{6.8}(2,2)
-\begin{block}{Hierarchy:}
-  \begin{itemize}
-      \item  States (7)
-      \item  Zones (27)
-      \item  Regions (82)
-  \end{itemize}
-\end{block}
-\end{textblock}}
-\only<4>{\begin{textblock}{6.8}(2,6)
-\begin{block}{Base forecasts}
-ETS (exponential smoothing) models
-\end{block}\end{textblock}}
-
-\only<2>{\begin{textblock}{10.}(1.4,2)
-\begin{block}{Domestic visitor nights}
-Quarterly data: 1998 -- 2006.\\
-From: \textit{National Visitor Survey}, based on annual interviews of 120,000 Australians aged 15+, collected by Tourism Research Australia.
-\end{block}
-\end{textblock}}
-
-## Base forecasts
-\only<1>{\full{austourism1}}
-\only<2>{\full{austourism2}}
-\only<3>{\full{austourism3}}
-\only<4>{\full{austourism4}}
-\only<5>{\full{austourism5}}
-\only<6>{\full{austourism6}}
-\only<7>{\full{austourism7}}
-\only<8>{\full{austourism8}}
-\only<9>{\full{austourism9}}
-
-## Reconciled forecasts
-\only<1>{\full{Australia}}
-\only<2>{\full{States}}
-\only<3>{\full{Capitals}}
-
-## Forecast evaluation
-
-  * Select models using all observations;
-  * Re-estimate models using first 12 observations and generate 1- to 8-step-ahead forecasts;
-  * Increase sample size one observation at a time, re-estimate models, generate forecasts until the end of the sample;
-  * In total 24 1-step-ahead, 23 2-steps-ahead, up to 17 8-steps-ahead for forecast evaluation.
-
-## Forecast evaluation
-
-```{r rorigin, include=FALSE}
-for(i in 2:6)
-{
-  fname <- paste("rollingorigin",i,sep="")
-  savepdf(fname,height=9.5,width=15)
-  plot(0,0,xlim=c(0,28),ylim=c(0,1),
-       xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
-  for(j in 1:20)
-  {
-    test <- (6+j):26
-    train <- 1:(5+j)
-    arrows(0,1-j/20,27,1-j/20,0.05)
-    points(train,rep(1-j/20,length(train)),pch=19,col="blue")
-    if(length(test) >= i)
-      points(test[i], 1-j/20, pch=19, col="red")
-    if(length(test) >= i)
-      points(test[-i], rep(1-j/20,length(test)-1), pch=19, col="gray")
-    else
-      points(test, rep(1-j/20,length(test)), pch=19, col="gray")
-  }
-  text(28,.95,"time")
-  endpdf()
-}
-for(k in 1:20) {
-  fname <- paste("rorigin",k,sep="")
-  savepdf(fname,height=9.5,width=15)
-  plot(0,0,xlim=c(0,28),ylim=c(0,1),
-     xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
-  for(j in 1:k) {
-    test <- (6+j):26
-    train <- 1:(5+j)
-    arrows(0,1-j/20,27,1-j/20,0.05)
-    points(train,rep(1-j/20,length(train)),pch=19,col="blue")
-    if(length(test) >= 1) {
-      points(test[1], 1-j/20, pch=19, col="red")
-      points(test[-1], rep(1-j/20,length(test)-1), pch=19, col="gray")
-    }
-    else {
-      points(test, rep(1-j/20,length(test)), pch=19, col="gray")
-    }
-  }
-  text(28,.95,"time")
-  endpdf()
-}
-```
-
-\begin{textblock}{14}(0.3,1.4)
-\textbf{\textcolor{blue}{Training sets}} \hspace*{3cm}
-\textbf{\textcolor{red}{Test sets
-\only<1-20>{$h=1$}%
-\only<21>{$h=2$}%
-\only<22>{$h=3$}%
-\only<23>{$h=4$}%
-\only<24>{$h=5$}%
-\only<25>{$h=6$}%
-}}
-
-\end{textblock}
-\only<1>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin1}}
-\only<2>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin2}}
-\only<3>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin3}}
-\only<4>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin4}}
-\only<5>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin5}}
-\only<6>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin6}}
-\only<7>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin7}}
-\only<8>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin8}}
-\only<9>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin9}}
-\only<10>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin10}}
-\only<11>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin11}}
-\only<12>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin12}}
-\only<13>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin13}}
-\only<14>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin14}}
-\only<15>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin15}}
-\only<16>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin16}}
-\only<17>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin17}}
-\only<18>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin18}}
-\only<19>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin19}}
-\only<20>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin20}}
-
-\only<21>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin2}}
-\only<22>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin3}}
-\only<23>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin4}}
-\only<24>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin5}}
-\only<25>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin6}}
-
-## Hierarchy: states, zones, regions
-\fontsize{10}{10.5}\sf\tabcolsep=0.12cm\vspace*{-0.6cm}
-\hspace*{-0.2cm}\begin{tabular}{lrrrrrrr}
-            & \multicolumn{6}{c}{\bf Forecast horizon} & \\
-\textbf{RMSE} & $h=1$  & $h=2$ & $h=3$ & $h=4$ & $h=5$ & $h=6$ & \textbf{Ave}\\
-\midrule
-\multicolumn{8}{c}{\bf\alert{Australia}}\\
-Base   & 1762.04    & 1770.29    & 1766.02     & 1818.82    & 1705.35    & 1721.17    & \bf 1757.28 \\
-Bottom & 1736.92    & 1742.69    & 1722.79     & 1752.74    & 1666.73    & 1687.43    & \bf 1718.22 \\
-WLS    & 1705.21    & 1715.87    & \hl 1703.75 & 1729.56    & 1627.79    & \hl1661.24 & \bf 1690.57 \\
-GLS    & \hl1704.64 & \hl1715.60 & 1705.31     & \hl1729.04 & \hl1626.36 & 1661.64    & \bf \hl 1690.43 \\[0.1cm]
-\multicolumn{8}{c}{\bf\alert{States}}\\
-Base   & 399.77     & 404.16     & 401.92      & 407.26     & 395.38     & 401.17     & \bf 401.61 \\
-Bottom & 404.29     & 406.95     & 404.96      & 409.02     & 399.80     & 401.55     & \bf 404.43 \\
-WLS    & \hl 398.84 & \hl 402.12 & \hl 400.71  & \hl 405.03 & 394.76     & 398.23     & \bf \hl 399.95 \\
-GLS    & \hl 398.84 & 402.16     & 400.86      & \hl 405.03 & \hl 394.59 & \hl 398.22 & \bf \hl 399.95 \\[0.1cm]
-\multicolumn{8}{c}{\bf\alert{Regions}}\\
-Base   & 93.15      & 93.38      & 93.45       & 93.79      & 93.50      & 93.56      & \bf 93.47 \\
-Bottom & 93.15      & 93.38      & 93.45       & 93.79      & 93.50      & 93.56      & \bf 93.47 \\
-WLS    & 93.02      & 93.32      & 93.38       & 93.72      & 93.39      & 93.53      & \bf 93.39 \\
-GLS    & \hl 92.98  & \hl 93.27  & \hl 93.34   & \hl 93.66  & \hl 93.34  & \hl 93.46  & \bf \hl 93.34
-\end{tabular}
 
 # Optimal forecast reconciliation
 
@@ -731,8 +444,296 @@ where $\bSigma_h$ is the $h$-step base forecast error covariance matrix.
  * Very simple and flexible method. Can work with *any* hierarchical or grouped time series.
  * Conceptually easy to implement: regression of base forecasts on structure matrix.
 
-# Lab Session 22
+# hts package for R
+
+## hts package for R
+\placefig{9.5}{1}{width=2cm}{Rlogo}
+
+\begin{textblock}{12.}(0.5,1.5)\fontsize{11}{14}\sf
+\alert{hts: Hierarchical and Grouped Time Series}
+
+Methods for analysing and forecasting hierarchical and grouped time series\vspace*{0.1cm}
+
+\tabcolsep=0.1cm
+\begin{tabular}{@{}ll}
+Version: & 5.1.5\\
+Depends: & R ($\ge$ 3.2.0), forecast ($\ge$ 8.1) \\
+Imports: & SparseM, Matrix, matrixcalc, parallel, utils, methods, graphics, grDevices, stats\\
+LinkingTo: & Rcpp ($\ge$ 0.11.0), RcppEigen\\
+Suggests: &testthat, knitr, rmarkdown\\
+Published: & 2018-03-26\\
+Author: &Rob J Hyndman, Alan Lee, Earo Wang, Shanika Wickramasuriya\\
+Maintainer: &Rob J Hyndman $<$Earo.Wang at gmail.com$>$\\
+BugReports: & \url{https://github.com/earowang/hts/issues} \\
+License: & GPL ($\ge2$) \\
+URL: & \url{http://pkg.earo.me/hts}
+\end{tabular}
+\end{textblock}
+
+## Example using R
+\fontsize{10}{10}\sf
+
+```r
+library(hts)
+
+# bts is a matrix containing the bottom level time series
+# nodes describes the hierarchical structure
+y <- hts(bts, nodes=list(2, c(3,2)))
+```
+
+\only<2>{\begin{textblock}{5}(7,3.5){\begin{block}{}\centering\small
+\begin{tikzpicture}[level distance=1cm]
+\tikzstyle{every node}=[ellipse,draw,fill=red!15,inner sep=2pt]
+\tikzstyle[level distance=.01cm]
+\tikzstyle[sibling distance=4cm]
+\tikzstyle{level 2}=[sibling distance=10mm,font=\scriptsize,set style={{every node}+=[fill=yellow]}]
+\tikzstyle{level 1}=[sibling distance=30mm,font=\footnotesize,set style={{every node}+=[fill=blue!15]}]
+\node{Total}[edge from parent fork down]
+ child {node {A}
+   child {node {AX}}
+   child {node {AY}}
+   child {node {AZ}}
+ }
+ child {node {B}
+   child {node {BX}}
+   child {node {BY}}
+ };
+\end{tikzpicture}\end{block}}\end{textblock}}
+
+\vspace*{10cm}
+
+## Example using R
+\fontsize{10}{10}\sf
+
+```r
+library(hts)
+
+# bts is a matrix containing the bottom level time series
+# nodes describes the hierarchical structure
+y <- hts(bts, nodes=list(2, c(3,2)))
+```
+
+\begin{textblock}{5}(7,3.5){\begin{block}{}\centering\small
+\begin{tikzpicture}[level distance=1cm]
+\tikzstyle{every node}=[ellipse,draw,fill=red!15,inner sep=2pt]
+\tikzstyle[level distance=.01cm]
+\tikzstyle[sibling distance=4cm]
+\tikzstyle{level 2}=[sibling distance=10mm,font=\scriptsize,set style={{every node}+=[fill=yellow]}]
+\tikzstyle{level 1}=[sibling distance=30mm,font=\footnotesize,set style={{every node}+=[fill=blue!15]}]
+\node{Total}[edge from parent fork down]
+ child {node {A}
+   child {node {AX}}
+   child {node {AY}}
+   child {node {AZ}}
+ }
+ child {node {B}
+   child {node {BX}}
+   child {node {BY}}
+ };
+\end{tikzpicture}\end{block}}\end{textblock}
+
+\vspace*{3.4cm}
+
+```r
+# Forecast 10-step-ahead using WLS combination method
+# with auto.arima() used at each node
+fc <- forecast(y, h=10, fmethod='arima')
+```
+
+\vspace*{10cm}
+
+## forecast.gts() function
+\fontsize{10}{10}\sf
+
+\alert{Usage}
+
+```r
+forecast(object, h,
+  method = c("comb", "bu", "mo", "tdgsf", "tdgsa", "tdfp"),
+  fmethod = c("ets", "rw", "arima"),
+  weights = c("wls", "ols", "mint", "nseries"),
+  covariance = c("shr","sam"),
+  positive = TRUE,
+  parallel = FALSE, num.cores = 2, ...)
+```
+
+\vspace*{-0.2cm}
+
+\alert{Arguments}\vspace*{-0.2cm}
+
+\begin{tabular}{lp{9.4cm}}
+\Verb|object| & Hierarchical time series object of class \texttt{gts}.\\
+\Verb|h| & Forecast horizon\\
+\Verb|method| & Method for distributing forecasts within the hierarchy. \\
+\Verb|fmethod| & Forecasting method to use\\
+\Verb|weights| & Weights used for "optimal combination" method. \\
+\Verb|covariance| & Shrinkage estimator or sample estimator for GLS covariance.\\
+\Verb|positive| & If TRUE, forecasts are forced to be strictly positive\\
+\Verb|parallel| & If TRUE, allow parallel processing\\
+\Verb|num.cores| & If parallel = TRUE, specify how many cores to be used
+\end{tabular}
+
+# Application: Australian tourism
+
+## Australian tourism
+\full{regions1_with_labels}
+\only<3-4>{\begin{textblock}{6.8}(2,2)
+\begin{block}{Hierarchy:}
+  \begin{itemize}
+      \item  States (7)
+      \item  Zones (27)
+      \item  Regions (82)
+  \end{itemize}
+\end{block}
+\end{textblock}}
+\only<4>{\begin{textblock}{6.8}(2,6)
+\begin{block}{Base forecasts}
+ETS (exponential smoothing) models
+\end{block}\end{textblock}}
+
+\only<2>{\begin{textblock}{10.}(1.4,2)
+\begin{block}{Domestic visitor nights}
+Quarterly data: 1998 -- 2006.\\
+From: \textit{National Visitor Survey}, based on annual interviews of 120,000 Australians aged 15+, collected by Tourism Research Australia.
+\end{block}
+\end{textblock}}
+
+## Base forecasts
+\only<1>{\full{austourism1}}
+\only<2>{\full{austourism2}}
+\only<3>{\full{austourism3}}
+\only<4>{\full{austourism4}}
+\only<5>{\full{austourism5}}
+\only<6>{\full{austourism6}}
+\only<7>{\full{austourism7}}
+\only<8>{\full{austourism8}}
+\only<9>{\full{austourism9}}
+
+## Reconciled forecasts
+\only<1>{\full{Australia}}
+\only<2>{\full{States}}
+\only<3>{\full{Capitals}}
+
+## Forecast evaluation
+
+  * Select models using all observations;
+  * Re-estimate models using first 12 observations and generate 1- to 8-step-ahead forecasts;
+  * Increase sample size one observation at a time, re-estimate models, generate forecasts until the end of the sample;
+  * In total 24 1-step-ahead, 23 2-steps-ahead, up to 17 8-steps-ahead for forecast evaluation.
+
+## Forecast evaluation
+
+```{r rorigin, include=FALSE}
+for(i in 2:6)
+{
+  fname <- paste("rollingorigin",i,sep="")
+  savepdf(fname,height=9.5,width=15)
+  plot(0,0,xlim=c(0,28),ylim=c(0,1),
+       xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
+  for(j in 1:20)
+  {
+    test <- (6+j):26
+    train <- 1:(5+j)
+    arrows(0,1-j/20,27,1-j/20,0.05)
+    points(train,rep(1-j/20,length(train)),pch=19,col="blue")
+    if(length(test) >= i)
+      points(test[i], 1-j/20, pch=19, col="red")
+    if(length(test) >= i)
+      points(test[-i], rep(1-j/20,length(test)-1), pch=19, col="gray")
+    else
+      points(test, rep(1-j/20,length(test)), pch=19, col="gray")
+  }
+  text(28,.95,"time")
+  endpdf()
+}
+for(k in 1:20) {
+  fname <- paste("rorigin",k,sep="")
+  savepdf(fname,height=9.5,width=15)
+  plot(0,0,xlim=c(0,28),ylim=c(0,1),
+     xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
+  for(j in 1:k) {
+    test <- (6+j):26
+    train <- 1:(5+j)
+    arrows(0,1-j/20,27,1-j/20,0.05)
+    points(train,rep(1-j/20,length(train)),pch=19,col="blue")
+    if(length(test) >= 1) {
+      points(test[1], 1-j/20, pch=19, col="red")
+      points(test[-1], rep(1-j/20,length(test)-1), pch=19, col="gray")
+    }
+    else {
+      points(test, rep(1-j/20,length(test)), pch=19, col="gray")
+    }
+  }
+  text(28,.95,"time")
+  endpdf()
+}
+```
+
+\begin{textblock}{14}(0.3,1.4)
+\textbf{\textcolor{blue}{Training sets}} \hspace*{3cm}
+\textbf{\textcolor{red}{Test sets
+\only<1-20>{$h=1$}%
+\only<21>{$h=2$}%
+\only<22>{$h=3$}%
+\only<23>{$h=4$}%
+\only<24>{$h=5$}%
+\only<25>{$h=6$}%
+}}
+
+\end{textblock}
+\only<1>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin1}}
+\only<2>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin2}}
+\only<3>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin3}}
+\only<4>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin4}}
+\only<5>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin5}}
+\only<6>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin6}}
+\only<7>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin7}}
+\only<8>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin8}}
+\only<9>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin9}}
+\only<10>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin10}}
+\only<11>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin11}}
+\only<12>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin12}}
+\only<13>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin13}}
+\only<14>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin14}}
+\only<15>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin15}}
+\only<16>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin16}}
+\only<17>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin17}}
+\only<18>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin18}}
+\only<19>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin19}}
+\only<20>{\placefig{0.0}{2.0}{width=12.6cm}{rorigin20}}
+
+\only<21>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin2}}
+\only<22>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin3}}
+\only<23>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin4}}
+\only<24>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin5}}
+\only<25>{\placefig{0.0}{2.0}{width=12.6cm}{rollingorigin6}}
+
+## Hierarchy: states, zones, regions
+\fontsize{10}{10.5}\sf\tabcolsep=0.12cm\vspace*{-0.6cm}
+\hspace*{-0.2cm}\begin{tabular}{lrrrrrrr}
+            & \multicolumn{6}{c}{\bf Forecast horizon} & \\
+\textbf{RMSE} & $h=1$  & $h=2$ & $h=3$ & $h=4$ & $h=5$ & $h=6$ & \textbf{Ave}\\
+\midrule
+\multicolumn{8}{c}{\bf\alert{Australia}}\\
+Base   & 1762.04    & 1770.29    & 1766.02     & 1818.82    & 1705.35    & 1721.17    & \bf 1757.28 \\
+Bottom & 1736.92    & 1742.69    & 1722.79     & 1752.74    & 1666.73    & 1687.43    & \bf 1718.22 \\
+WLS    & 1705.21    & 1715.87    & \hl 1703.75 & 1729.56    & 1627.79    & \hl1661.24 & \bf 1690.57 \\
+GLS    & \hl1704.64 & \hl1715.60 & 1705.31     & \hl1729.04 & \hl1626.36 & 1661.64    & \bf \hl 1690.43 \\[0.1cm]
+\multicolumn{8}{c}{\bf\alert{States}}\\
+Base   & 399.77     & 404.16     & 401.92      & 407.26     & 395.38     & 401.17     & \bf 401.61 \\
+Bottom & 404.29     & 406.95     & 404.96      & 409.02     & 399.80     & 401.55     & \bf 404.43 \\
+WLS    & \hl 398.84 & \hl 402.12 & \hl 400.71  & \hl 405.03 & 394.76     & 398.23     & \bf \hl 399.95 \\
+GLS    & \hl 398.84 & 402.16     & 400.86      & \hl 405.03 & \hl 394.59 & \hl 398.22 & \bf \hl 399.95 \\[0.1cm]
+\multicolumn{8}{c}{\bf\alert{Regions}}\\
+Base   & 93.15      & 93.38      & 93.45       & 93.79      & 93.50      & 93.56      & \bf 93.47 \\
+Bottom & 93.15      & 93.38      & 93.45       & 93.79      & 93.50      & 93.56      & \bf 93.47 \\
+WLS    & 93.02      & 93.32      & 93.38       & 93.72      & 93.39      & 93.53      & \bf 93.39 \\
+GLS    & \hl 92.98  & \hl 93.27  & \hl 93.34   & \hl 93.66  & \hl 93.34  & \hl 93.46  & \bf \hl 93.34
+\end{tabular}
+
+
+# Lab Session 5
 ##
 \fontsize{48}{60}\sf\centering
-**Lab Session 22**
+**Lab Session 5**
 
