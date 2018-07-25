@@ -624,6 +624,7 @@ From: \textit{National Visitor Survey}, based on annual interviews of 120,000 Au
 ## Forecast evaluation
 
 ```{r rorigin, include=FALSE}
+ifelse(!dir.exists(file.path(".", "Rfigs")), dir.create(file.path(".", "Rfigs")), FALSE)
 for(i in 2:6)
 {
   fname <- paste("rollingorigin",i,sep="")
