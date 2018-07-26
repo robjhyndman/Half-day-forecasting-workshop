@@ -36,8 +36,8 @@ y_t = \beta_0 + \beta_1 x_{1,t} + \dots + \beta_k x_{k,t} + \varepsilon_t,
   * $y_t$ modeled as function of $k$ explanatory variables
 $x_{1,t},\dots,x_{k,t}$.
   * In regression, we assume that $\varepsilon_t$ was  WN.
-  * Now we want to allow $\varepsilon_t$ to be autocorrelated.
-\vspace*{0.3cm}
+  * Now we want to allow $\varepsilon_t$ to be autocorrelated, and potentially non-stationary.
+\vspace*{0.1cm}
 \pause
 \begin{alertblock}{Example: ARIMA(1,1,1) errors}\vspace*{-0.2cm}
 \begin{align*}
@@ -59,34 +59,6 @@ y_t &= \beta_0 + \beta_1 x_{1,t} + \dots + \beta_k x_{k,t} + \eta_t,\\
   * Only the errors $\eta_t$ are assumed to be white noise.
   * In ordinary regression, $\eta_t$ is assumed to be white noise and so $\eta_t = \varepsilon_t$.
 
-## Estimation
-\fontsize{14}{15}\sf
-
-If we minimize $\sum \eta_t^2$ (by using ordinary regression):
-
-  1. Estimated coefficients $\hat{\beta}_0,\dots,\hat{\beta}_k$ are no longer optimal as some information ignored;
-  2. Statistical tests associated with the model (e.g., t-tests on the coefficients) are incorrect.
-  3. $p$-values for coefficients usually too small (``spurious regression'').
-  4. AIC of fitted models misleading.
-
-\pause
-
-###
- * Minimizing $\sum \varepsilon_t^2$ avoids these problems.
- * Maximizing likelihood is similar to minimizing $\sum \varepsilon_t^2$.
-
-## Stationarity
-
-\begin{block}{Regression with ARMA errors}
-\[
-y_t = \beta_0 + \beta_1 x_{1,t} + \dots + \beta_k x_{k,t} + \eta_t,
-\]
-where $\eta_t$ is an ARMA process.
-\end{block}
-
-  * If we estimate the model while any variable is non-stationary, the estimated coefficients can be incorrect.
-  * Difference variables until all stationary.
-  * If necessary, apply same differencing to all variables to preserve interpretability.
 
 ## Regression with ARIMA errors
 \fontsize{13}{15}\sf
@@ -108,7 +80,7 @@ y'_t &= \beta_1 x'_{1,t} + \dots + \beta_k x'_{k,t} + \eta'_t.\\
 \end{align*}
 \end{block}
 
-## Model selection
+## Variable selection
 \fontsize{13}{15}\sf
 
   * Fit regression model with automatically selected ARIMA errors.
