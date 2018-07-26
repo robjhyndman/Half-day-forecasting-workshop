@@ -187,7 +187,7 @@ Complex roots of $1-\phi_1 z - \phi_2 z^2 - \dots - \phi_pz^p$ lie outside the u
 \begin{block}{Moving Average (MA) models:}
 \begin{align*}
   y_{t} &= c + \varepsilon_t + \theta_{1}\varepsilon_{t - 1} + \theta_{2}\varepsilon_{t - 2} + \cdots + \theta_{q}\varepsilon_{t - q}\\
-  y_t &= c + (1+\theta_1B + \cdots + \theta_1B^q)\varepsilon_t
+  y_t &= c + (1+\theta_1B + \cdots + \theta_qB^q)\varepsilon_t
 \end{align*}
 where $\varepsilon_t$ is white noise.
 This is a multiple regression with \textbf{past \emph{errors}}
